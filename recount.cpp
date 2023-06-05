@@ -44,13 +44,24 @@ int recount::get_census(){
     return this->census;
 }
 
-//TO DO--------------------------------------- HEE, No se que hace el print
+
 /**
      * @brief Print information of the
      */
-void print();
+void recount::print(){
+    cout<<"Code: " << this->code <<endl;
+    cout<<"Municipal: " << this->municipal <<endl;
+    cout<<"Zone: " << this->zone <<endl;
+    cout<<"Section: " << this->section <<endl;
+    cout<<"Name: " << this->name <<endl;
+    cout<<"Census: " << this->census <<endl;
+    cout<<"Abstentions: " << this->abstentions <<endl;
+    cout<<"v_cast: " << this->v_cast <<endl;
+    cout<<"v_invalid: " << this->v_invalid <<endl;
+    cout<<"v_valid: " << this->v_valid <<endl;
+    cout<<"V_WHITE: " << this->v_white <<endl;
+};
 
-//--------------------------------------------
 
 //SETTERS
 /**

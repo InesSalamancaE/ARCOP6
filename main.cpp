@@ -7,7 +7,7 @@
 #include <cstring>
 #include <sys/time.h>
 #include <omp.h>
-#include <recount.cpp>
+//#include <recount.cpp>
 #include <QDir>
 
 using namespace std;
@@ -28,7 +28,7 @@ int main()
     // It can be used to know the execution path
     //cout << "[EXECUTION PATH]: " << QDir::currentPath().toStdString() + '\n';
     // Path and name of the csv file
-    string fname = "../project_base/elecciones_navarra_1999.csv";
+    string fname = "D:/Inespelirroja/Documents/UniLeon/Asignaturas/Arquitectura de computadores/Practica/P6/project_base/elecciones_navarra_1999.csv";
 
     // Init variables
     vector<recount> content;
@@ -52,7 +52,7 @@ int main()
                 row.push_back(word);
             if (count_row>0){ //First row of the document correspond to the header
                 // TO_DO: CREATE recount object and append to content
-                //Create recount object--------------------------------------------------------------------------------------------------------------------------------------
+                //Create recount object
                 read_recount = recount(row);
                 //recount recountObject(row);
                 content.push_back(read_recount);
@@ -77,52 +77,49 @@ int main()
     gettimeofday(&begin, 0);
 
 */
-    calculate_total_census(content, "secuential");
-    calculate_total_abstention(content, "sequential");
-    get_min_census(content, "sequential");
-    get_max_census(content, "sequential");
-    get_mean_p_participation(content, "sequential");
-    get_mean_p_abstention(content, "sequential");
+    //Sequencial------------------------------------------------------------------------------------------------------
+
+    cout<<"Total census (sequential): " << calculate_total_census(content, "sequential")<<endl;
+    cout<<" "<<endl;
+
+    cout<<"Total abstention (sequential): " << calculate_total_abstention(content, "sequential")<<endl;
+    cout<<" "<<endl;
+
+    recount recountMiSeq = get_min_census(content, "sequential");
+    cout<<" "<<endl;
+
+    recount recountMxSeq = get_max_census(content, "sequential");
+    cout<<" "<<endl;
+
+    cout<<"Mean participation (sequential): " << get_mean_p_participation(content, "sequential")<<endl;
+    cout<<" "<<endl;
 
 
-/*
+    cout<<"Mean abstention (sequential): " << get_mean_p_abstention(content, "sequential")<<endl;
+    cout<<" "<<endl;
 
-    gettimeofday(&end, 0);
-    wt2=omp_get_wtime();
-    long seconds = end.tv_sec - begin.tv_sec;
-    long microseconds = end.tv_usec - begin.tv_usec;
-    double elapsed = seconds*1e-6 + microseconds; //in microseconds
-    printf("[CPU_TIME]: %s Secuential  mode: %s  \t%.2f microseconds \n", __FUNCTION__, elapsed);
-    double omp_elapse = (wt2-wt1)*1e-6;
-    printf("[OMP_TIME]: %s Secuential mode: %s  \t%.2f microseconds \n", __FUNCTION__, omp_elapse);
-*/
-    //Parallel
-    /*
-    struct timeval beginp, endp;
-    double wt1p=0,wt2p = 0;
-    wt1p=omp_get_wtime();
-    gettimeofday(&beginp, 0);
-*/
 
-    //Functions
-    calculate_total_census(content, "parallel");
-    calculate_total_abstention(content, "parallel");
-    get_min_census(content, "parallel");
-    get_max_census(content, "parallel");
-    get_mean_p_participation(content, "parallel");
-    get_mean_p_abstention(content, "parallel");
+    //Paralel-----------------------------------------------------------------------------------------------------------
+    cout<<"Total census (parallel): " << calculate_total_census(content, "parallel")<<endl;
+    cout<<" "<<endl;
 
-/*
-    gettimeofday(&endp, 0);
-    wt2p=omp_get_wtime();
-    long secondsp = endp.tv_sec - beginp.tv_sec;
-    long microsecondsp = endp.tv_usec - beginp.tv_usec;
-    double elapsedp = secondsp*1e-6 + microsecondsp; //in microseconds
-    printf("[CPU_TIME]: %s Secuential  mode \n", elapsedp);
-    double omp_elapsep = (wt2p-wt1p)*1e-6;
-    printf("[OMP_TIME]: %s Secuential mode \n", omp_elapsep);
+    cout<<"Total abstention (parallel): " << calculate_total_abstention(content, "parallel")<<endl;
+    cout<<" "<<endl;
 
-*/
+    recount recountMiPa = get_min_census(content, "parallel");
+    cout<<" "<<endl;
+
+    recount recountMxPa = get_max_census(content, "parallel");
+    cout<<" "<<endl;
+
+    cout<<"Mean participation (parallel): " << get_mean_p_participation(content, "parallel")<<endl;
+    cout<<" "<<endl;
+
+
+    cout<<"Mean abstention (parallel): " << get_mean_p_abstention(content, "parallel")<<endl;
+    cout<<" "<<endl;
+
+
     return 0;
 }
 
@@ -142,10 +139,11 @@ int calculate_total_census(vector<recount> content, string comp_mode){
         int total = 0;
         int c=0;
 
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt1=omp_get_wtime();
-#endif
+        #endif
         gettimeofday(&begin, 0);
+
         // Sequential mode
         if(comp_mode=="sequential"){
 
@@ -157,30 +155,34 @@ int calculate_total_census(vector<recount> content, string comp_mode){
 
         // Parallel mode
         }else if(comp_mode=="parallel"){
-            double s=0;
+
             // TO_DO: calculate total in parallel mode
             for(int i = 0; i < (int)content.size(); i++){
                 c = content.at(i).get_census();
                 total = total + c;
             }
-            //Falta añadir el parallel--------------------------------------------------------------------------------------------------
+
 
         }else{
             printf("[ERROR]: Not valid computational mode in %s. Only: sequential and parallel\n", __FUNCTION__);
             throw ("ERROR");
         }
         gettimeofday(&end, 0);
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt2=omp_get_wtime();
-#endif
+        #endif
 
         //Print results
         long seconds = end.tv_sec - begin.tv_sec;
         long microseconds = end.tv_usec - begin.tv_usec;
         double elapsed = seconds*1e-6 + microseconds; //in microseconds
         printf("[CPU_TIME]: %s \tComputational mode: %s  \t%.2f microseconds \n", __FUNCTION__, comp_mode.c_str(), elapsed);
+
+        //#ifdef _OPENMP
         double omp_elapse = (wt2-wt1)*1e-6;
         printf("[OMP_TIME]: %s \tComputational mode: %s  \t%.2f microseconds \n", __FUNCTION__, comp_mode.c_str(), omp_elapse);
+        //#endif
+
         return total;
 }
 
@@ -192,9 +194,9 @@ void calculate_p_participation(vector<recount> content, string mode){
         double wt1 = 0,wt2 = 0;
         float participation = 0;
 
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt1=omp_get_wtime();
-#endif
+        #endif
         gettimeofday(&begin, 0);
         // Sequential mode
         if(mode=="sequential"){
@@ -222,9 +224,9 @@ void calculate_p_participation(vector<recount> content, string mode){
         }
         gettimeofday(&end, 0);
 
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt2=omp_get_wtime();
-#endif
+        #endif
 
         //Print results
         long seconds = end.tv_sec - begin.tv_sec;
@@ -245,9 +247,9 @@ void calculate_p_abstention(vector<recount> content, string mode){
         float participation = 0;
 
 
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt1=omp_get_wtime();
-#endif
+        #endif
 
         gettimeofday(&begin, 0);
         // Sequential mode
@@ -269,16 +271,16 @@ void calculate_p_abstention(vector<recount> content, string mode){
                 content.at(i).set_p_abstention(participation);
             }
 
-            //Falta añadir el parallel--------------------------------------------------------------------------------------------------
+
 
         }else{
             printf("[ERROR]: Not valid computational mode in %s. Only: sequential and parallel\n", __FUNCTION__);
             throw ("ERROR");
         }
         gettimeofday(&end, 0);
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt2=omp_get_wtime();
-#endif
+        #endif
 
         //Print results
         long seconds = end.tv_sec - begin.tv_sec;
@@ -290,7 +292,7 @@ void calculate_p_abstention(vector<recount> content, string mode){
 
 
 }
-//int calculate_total_census(vector<recount> content, string comp_mode="sequential"); //NO ENTIENDO -------------------------------------------------
+//int calculate_total_census(vector<recount> content, string comp_mode="sequential");
 int calculate_total_abstention(vector<recount> content, string comp_mode){
         // Init variables
         recount r = recount();
@@ -299,10 +301,11 @@ int calculate_total_abstention(vector<recount> content, string comp_mode){
         int a =0;
         int total = 0;
 
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt1=omp_get_wtime();
-#endif
+        #endif
         gettimeofday(&begin, 0);
+
         // Sequential mode
         if(comp_mode=="sequential"){
 
@@ -320,16 +323,15 @@ int calculate_total_abstention(vector<recount> content, string comp_mode){
                 a = content.at(i).get_abstentions();
                 total = total + a;
             }
-            //Falta añadir el parallel--------------------------------------------------------------------------------------------------
 
         }else{
             printf("[ERROR]: Not valid computational mode in %s. Only: sequential and parallel\n", __FUNCTION__);
             throw ("ERROR");
         }
         gettimeofday(&end, 0);
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt2=omp_get_wtime();
-#endif
+        #endif
 
         //Print results
         long seconds = end.tv_sec - begin.tv_sec;
@@ -347,9 +349,9 @@ recount get_min_census(vector<recount> content, string comp_mode){
         double wt1 = 0,wt2 = 0;
         int minCensus = 100;
 
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt1=omp_get_wtime();
-#endif
+        #endif
         gettimeofday(&begin, 0);
         // Sequential mode
         if(comp_mode=="sequential"){
@@ -357,10 +359,12 @@ recount get_min_census(vector<recount> content, string comp_mode){
             // TO_DO: calculate total in sequential mode
             for(int i = 0; i < (int)content.size(); i++){
                 if (content[i].get_census() < minCensus){
-                minCensus = content.at(i).get_census();;
-                r = content.at(i);
+                    minCensus = content.at(i).get_census();;
+                    r = content.at(i);
                 }
             }
+            r.print();
+
 
 
             // Parallel mode
@@ -375,16 +379,16 @@ recount get_min_census(vector<recount> content, string comp_mode){
                 r = content.at(i);
                 }
             }
-
+            r.print();
 
         }else{
             printf("[ERROR]: Not valid computational mode in %s. Only: sequential and parallel\n", __FUNCTION__);
             throw ("ERROR");
         }
         gettimeofday(&end, 0);
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt2=omp_get_wtime();
-#endif
+        #endif
 
         //Print results
         long seconds = end.tv_sec - begin.tv_sec;
@@ -405,9 +409,9 @@ recount get_max_census(vector<recount> content, string comp_mode){
         double wt1 = 0,wt2 = 0;
         int maxCensus = 0;
 
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt1=omp_get_wtime();
-#endif
+        #endif
         gettimeofday(&begin, 0);
         // Sequential mode
         if(comp_mode=="sequential"){
@@ -420,6 +424,7 @@ recount get_max_census(vector<recount> content, string comp_mode){
                 }
             }
 
+            r.print();
 
             // Parallel mode
         }else if(comp_mode=="parallel"){
@@ -432,13 +437,18 @@ recount get_max_census(vector<recount> content, string comp_mode){
                 r = content.at(i);
                 }
             }
+            r.print();
 
-                     throw ("ERROR");
+
+        } else {
+            printf("[ERROR]: Not valid computational mode in %s. Only: sequential and parallel\n", __FUNCTION__);
+            throw ("ERROR");
         }
+
         gettimeofday(&end, 0);
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt2=omp_get_wtime();
-#endif
+        #endif
 
         //Print results
         long seconds = end.tv_sec - begin.tv_sec;
@@ -459,9 +469,9 @@ float get_mean_p_participation(vector<recount> content, string mode){
         float total;
         float result = 0;
 
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt1=omp_get_wtime();
-#endif
+        #endif
         gettimeofday(&begin, 0);
         // Sequential mode
         if(mode=="sequential"){
@@ -486,16 +496,15 @@ float get_mean_p_participation(vector<recount> content, string mode){
 
             result = voted/total;
 
-            //Falta añadir el parallel--------------------------------------------------------------------------------------------------
 
         }else{
             printf("[ERROR]: Not valid computational mode in %s. Only: sequential and parallel\n", __FUNCTION__);
             throw ("ERROR");
         }
         gettimeofday(&end, 0);
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt2=omp_get_wtime();
-#endif
+        #endif
 
         //Print results
         long seconds = end.tv_sec - begin.tv_sec;
@@ -516,9 +525,9 @@ float get_mean_p_abstention(vector<recount> content, string mode){
         float total;
         float result = 0;
 
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt1=omp_get_wtime();
-#endif
+        #endif
         gettimeofday(&begin, 0);
         // Sequential mode
         if(mode=="sequential"){
@@ -543,16 +552,15 @@ float get_mean_p_abstention(vector<recount> content, string mode){
 
             result = noVoted/total;
 
-            //Falta añadir el parallel--------------------------------------------------------------------------------------------------
 
         }else{
             printf("[ERROR]: Not valid computational mode in %s. Only: sequential and parallel\n", __FUNCTION__);
             throw ("ERROR");
         }
         gettimeofday(&end, 0);
-#ifdef _OPENMP
+        #ifdef _OPENMP
         wt2=omp_get_wtime();
-#endif
+        #endif
 
         //Print results
         long seconds = end.tv_sec - begin.tv_sec;
